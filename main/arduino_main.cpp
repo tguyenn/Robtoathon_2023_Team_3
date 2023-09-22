@@ -35,7 +35,7 @@ limitations under the License.
 //
 // Instead of using "Serial" you can use Bluepad32 "Console" class instead.
 // It is somewhat similar to Serial but not exactly the same.
-//
+// testing
 // Should you want to still use "Serial", you have to disable the Bluepad32's console
 // from "sdkconfig.defaults" with:
 //    CONFIG_BLUEPAD32_USB_CONSOLE_ENABLE=n
