@@ -26,29 +26,65 @@ limitations under the License.
 #include <ESP32SharpIR.h>
 #include <QTRSensors.h>
 
-//
-// README FIRST, README FIRST, README FIRST
-//
-// Bluepad32 has a built-in interactive console.
-// By default it is enabled (hey, this is a great feature!).
-// But it is incompatible with Arduino "Serial" class.
-//
-// Instead of using "Serial" you can use Bluepad32 "Console" class instead.
-// It is somewhat similar to Serial but not exactly the same.
-// testing
-// holy moly another test
-// Should you want to still use "Serial", you have to disable the Bluepad32's console
-// from "sdkconfig.defaults" with:
-//    CONFIG_BLUEPAD32_USB_CONSOLE_ENABLE=n
-#define LED 2
+GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 
+// checks if controller connects with ESP32
+void onConnectedGamepad(GamepadPtr gp) {
+    bool foundEmptySlot = false;
+    for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
+        if (myGamepads[i] == nullptr) {
+            // Console.printf("CALLBACK: Gamepad is connected, index=%d\n", i);
+            // Additionally, you can get certain gamepad properties like:
+            // Model, VID, PID, BTAddr, flags, etc.
+            // GamepadProperties properties = gp->getProperties();
+            // Console.printf("Gamepad model: %s, VID=0x%04x, PID=0x%04x\n", gp->getModelName(), properties.vendor_id,
+            //                properties.product_id);
+            myGamepads[i] = gp;
+            foundEmptySlot = true;
+            break;
+        }
+    }
+    if (!foundEmptySlot) {
+        // Console.println("CALLBACK: Gamepad connected, but could not found empty slot");
+    }
+}
+
+void onDisconnectedGamepad(GamepadPtr gp) {
+    bool foundGamepad = false;
+    for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
+        if (myGamepads[i] == gp) {
+            // Console.printf("CALLBACK: Gamepad is disconnected from index=%d\n", i);
+            myGamepads[i] = nullptr;
+            foundGamepad = true;
+            break;
+        }
+    }
+
+    if (!foundGamepad) {
+        // Console.println("CALLBACK: Gamepad disconnected, but not found in myGamepads");
+    }
+}
+
+ 
+Servo servo; // declare servo object 
 void setup() {
-    pinMode(LED,OUTPUT);
+    BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
+    BP32.forgetBluetoothKeys(); 
+
+    // servo.setPeriodHertz(50); // servo expects a pulse ~20 ms
+    servo.attach(13, 1000, 2000); // configures pin 13 with min/max pulse widths
 }
 
 void loop() {
-    digitalWrite(LED,LOW);
-    delay(1000);
-    digitalWrite(LED,HIGH);
-    delay(1000);
+    BP32.update();
+    GamepadPtr controller = myGamepads[0];
+    if (controller && controller->isConnected()) {
+        servo.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
+    }
+    vTaskDelay(1);
+    
+    // servo.write(1000);
+    // delay(1000);
+    // servo.write(2000);
+    // delay(1000);
 }

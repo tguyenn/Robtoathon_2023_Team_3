@@ -100,10 +100,10 @@ void setup() {
     // But might also fix some connection / re-connection issues.
     BP32.forgetBluetoothKeys();
 
-    ESP32PWM::allocateTimer(0);
-	ESP32PWM::allocateTimer(1);
-	ESP32PWM::allocateTimer(2);
-	ESP32PWM::allocateTimer(3);
+    // ESP32PWM::allocateTimer(0);
+	// ESP32PWM::allocateTimer(1);
+	// ESP32PWM::allocateTimer(2);
+	// ESP32PWM::allocateTimer(3);
     servo.setPeriodHertz(50);
     servo.attach(12, 1000, 2000);
 
