@@ -26,20 +26,7 @@ limitations under the License.
 #include <ESP32SharpIR.h>
 #include <QTRSensors.h>
 
-//
-// README FIRST, README FIRST, README FIRST
-//
-// Bluepad32 has a built-in interactive console.
-// By default it is enabled (hey, this is a great feature!).
-// But it is incompatible with Arduino "Serial" class.
-//
-// Instead of using "Serial" you can use Bluepad32 "Console" class instead.
-// It is somewhat similar to Serial but not exactly the same.
-// testing
-// holy moly another test
-// Should you want to still use "Serial", you have to disable the Bluepad32's console
-// from "sdkconfig.defaults" with:
-//    CONFIG_BLUEPAD32_USB_CONSOLE_ENABLE=n
+
 #define LED 2
 
 void setup() {
