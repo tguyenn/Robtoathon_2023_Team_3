@@ -15,6 +15,7 @@ limitations under the License.
 ****************************************************************************/
 
 #include "sdkconfig.h"
+#include<iostream>
 #ifndef CONFIG_BLUEPAD32_PLATFORM_ARDUINO
 #error "Must only be compiled when using Bluepad32 Arduino platform"
 #endif  // !CONFIG_BLUEPAD32_PLATFORM_ARDUINO
@@ -66,25 +67,30 @@ void onDisconnectedGamepad(GamepadPtr gp) {
 }
 
  
-Servo servo; // declare servo object 
+Servo servo1; // declare servo object
+Servo servo2; 
 void setup() {
     BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
     BP32.forgetBluetoothKeys(); 
 
-    // servo.setPeriodHertz(50); // servo expects a pulse ~20 ms
-    servo.attach(13, 1000, 2000); // configures pin 13 with min/max pulse widths
+    servo1.setPeriodHertz(50); // servo expects a pulse ~20 ms
+    servo2.setPeriodHertz(50); // servo expects a pulse ~20 ms
+    servo1.attach(13, 1000, 2000); // configures pin 13 with min/max pulse widths
+    servo2.attach(12, 1000, 2000); // configures pin 13 with min/max pulse widths
+
 }
 
 void loop() {
-    BP32.update();
-    GamepadPtr controller = myGamepads[0];
-    if (controller && controller->isConnected()) {
-        servo.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
-    }
-    vTaskDelay(1);
+    // BP32.update();
+    // GamepadPtr controller = myGamepads[0];
+    // if (controller && controller->isConnected()) {
+    //     servo.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
+    // }
+    // vTaskDelay(1);
     
-    // servo.write(1000);
-    // delay(1000);
-    // servo.write(2000);
-    // delay(1000);
+    servo2.write(1500);
+    servo1.write(1500);
+    servo2.write(1000);
+    servo1.write(2000);
+    delay(5000);
 }
