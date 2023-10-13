@@ -67,7 +67,7 @@ void onDisconnectedGamepad(GamepadPtr gp) {
 }
 
  
-Servo servo1; // declare servo object
+Servo servo1; // declare servo objects
 Servo servo2; 
 void setup() {
     BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
@@ -86,8 +86,6 @@ void loop() {
     if (controller || controller->isConnected()) {
         servo1.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
         servo2.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
-
-        // servo2.write(1500 - ((((float) controller->axisY()) / 512.0f) * 500));
     }
     vTaskDelay(1);
 
