@@ -95,6 +95,7 @@ void loop() {
             servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
         }
             // +x
+            // :D
         if (controller->axisX() < 0.0f) {
             servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
             servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
