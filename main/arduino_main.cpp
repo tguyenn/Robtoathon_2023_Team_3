@@ -75,22 +75,20 @@ void setup() {
 
     servo1.setPeriodHertz(50); // servo expects a pulse ~20 ms
     servo2.setPeriodHertz(50); // servo expects a pulse ~20 ms
-    servo1.attach(13, 1000, 2000); // configures pin 13 with min/max pulse widths
+    servo1.attach(13, 1000, 2000); // configures pin 13 ususth min/max pulse widths
     servo2.attach(12, 1000, 2000); // configures pin 13 with min/max pulse widths
 
 }
 
 void loop() {
-    // BP32.update();
-    // GamepadPtr controller = myGamepads[0];
-    // if (controller && controller->isConnected()) {
-    //     servo.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
-    // }
-    // vTaskDelay(1);
-    
-    servo2.write(1500);
-    servo1.write(1500);
-    servo2.write(1000);
-    servo1.write(2000);
-    delay(5000);
+    BP32.update();
+    GamepadPtr controller = myGamepads[0];
+    if (controller || controller->isConnected()) {
+        servo1.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
+        servo2.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
+
+        // servo2.write(1500 - ((((float) controller->axisY()) / 512.0f) * 500));
+    }
+    vTaskDelay(1);
+
 }
