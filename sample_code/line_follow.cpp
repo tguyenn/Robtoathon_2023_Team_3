@@ -17,11 +17,17 @@ Servo servo2;
 QTRSensors qtr;
 
 void clockwise() {
+    servo1.write(1000);
     Serial.println("clockwise");
 }
 
 void counterclockwise() {
     Serial.println("counterclockwise");
+
+}
+
+void straight() {
+    Serial.println("straight");
 }
 
 
@@ -31,8 +37,10 @@ void setup() {
 // set up Serial Communication and sensor pins 
 Serial.begin(115200);
 qtr.setTypeRC(); // or setTypeAnalog() 
-qtr.setSensorPins ((const uint8_t []) {12, 14, 27}, 3);
+qtr.setSensorPins ((const uint8_t []) {12, 14, 27, 26}, 4);
 
+servo1.attach(15, 1000, 2000);
+servo2.attach(2, 1000, 2000);
 // calibration sequence
     for (uint8_t i = 0; i < 250; i++) {
         Serial.println("calibrating"); 
@@ -43,7 +51,7 @@ qtr.setSensorPins ((const uint8_t []) {12, 14, 27}, 3);
 
 
 void loop() {
-    uint16_t sensors[2];
+    uint16_t sensors[3];
     int16_t position = qtr.readLineBlack(sensors);
     
     Serial.print("sensor1: ");
@@ -52,10 +60,12 @@ void loop() {
     Serial.println(sensors[1]);
     Serial.print("sensor3: ");
     Serial.println(sensors[2]);
-    Serial.println(position);
+    Serial.print("sensor4: ");
+    Serial.println(sensors[3]);
+
 
     // 1000 means ON LINE OR EXPOSED TO MAX BRIGHTNESS
-    if(sensors[0] > 500 && sensors[2] < 500) {
+    if(sensors[0] <((sensors[1]+sensors[2]+sensors[3])/3)) {
         clockwise();
     }
 

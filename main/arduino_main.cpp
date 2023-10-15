@@ -15,7 +15,7 @@ limitations under the License.
 ****************************************************************************/
 
 #include "sdkconfig.h"
-#include<iostream>
+//#include<iostream>
 #ifndef CONFIG_BLUEPAD32_PLATFORM_ARDUINO
 #error "Must only be compiled when using Bluepad32 Arduino platform"
 #endif  // !CONFIG_BLUEPAD32_PLATFORM_ARDUINO
@@ -71,6 +71,9 @@ void onDisconnectedGamepad(GamepadPtr gp) {
  
 Servo servo1; // declare servo objects
 Servo servo2; 
+
+QTRSensors qtr;
+
 void setup() {
     BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
     BP32.forgetBluetoothKeys(); 
@@ -88,29 +91,34 @@ void setup() {
 
 
 void loop() {
-    // BP32.update();
-    GamepadPtr controller = myGamepads[0];
-    Serial.println("hehlloooo");
-    Serial.println(sensor1.getDistanceFloat());
-    
-    if (controller || controller->isConnected()) {
-        // forward control (y-axis)
-        servo1.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
-        servo2.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
+    BP32.update();
+    for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
+        GamepadPtr controller = myGamepads[i];
+        //Serial.println("hehlloooo");
+        //Serial.println(sensor1.getDistanceFloat());
+                Serial.print("x-axis:" );
+                Serial.println(controller->axisX());
+                Serial.print("y-axis:" );
+                Serial.println(controller->axisY());
+        if (controller && controller->isConnected()) {
+            // forward control (y-axis)
+            servo1.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
+            servo2.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
 
-        // turning control (x-axis)
-            // -x
-        if (controller->axisX() > 0.0f) {
-            servo1.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-            servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-        }
-            // +x
-            // :D
-        if (controller->axisX() < 0.0f) {
-            servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-            servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
+            // turning control (x-axis)
+                // -x
+            if (controller->axisX() > 0.0f) {
+                servo1.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
+                servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
+            }
+                // +x
+                // :D
+            if (controller->axisX() < 0.0f) {
+                servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
+                servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
+            }
         }
     }
-    vTaskDelay(1);
+        vTaskDelay(1);
 
 }
