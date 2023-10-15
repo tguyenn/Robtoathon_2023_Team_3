@@ -29,6 +29,8 @@ limitations under the License.
 
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 
+ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27);
+
 // checks if controller connects with ESP32
 void onConnectedGamepad(GamepadPtr gp) {
     bool foundEmptySlot = false;
@@ -78,11 +80,19 @@ void setup() {
     servo1.attach(13, 1000, 2000); // configures pin 13 ususth min/max pulse widths
     servo2.attach(12, 1000, 2000); // configures pin 13 with min/max pulse widths
 
+    Serial.begin(115200);
+    sensor1.setFilterRate(0.1f);
+    
 }
 
+
+
 void loop() {
-    BP32.update();
+    // BP32.update();
     GamepadPtr controller = myGamepads[0];
+    Serial.println("hehlloooo");
+    Serial.println(sensor1.getDistanceFloat());
+    
     if (controller || controller->isConnected()) {
         // forward control (y-axis)
         servo1.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
