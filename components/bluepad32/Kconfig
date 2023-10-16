@@ -78,7 +78,7 @@ menu "Bluepad32"
 
     config BLUEPAD32_USB_CONSOLE_ENABLE
         bool "Enable USB Console"
-        default  y
+        default  n
         depends on BLUEPAD32_UART_OUTPUT_ENABLE
         help
             Enables the USB console.
