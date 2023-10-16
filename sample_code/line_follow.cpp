@@ -17,17 +17,23 @@ Servo servo2;
 QTRSensors qtr;
 
 void clockwise() {
-    servo1.write(1000);
-    Serial.println("clockwise");
+    Serial.println("clockwise clockwise clockwise clockwise clockwise");
+    servo1.write(1750);
+    servo2.write(1500);
+
 }
 
 void counterclockwise() {
-    Serial.println("counterclockwise");
+    Serial.println("counterclockwise counterclockwise counterclockwise counterclockwise counterclockwise");
+    servo1.write(1500);
+    servo2.write(1750);
 
 }
 
 void straight() {
-    Serial.println("straight");
+    Serial.println("straight straight straight straight straight straight");
+    servo1.write(1750);
+    servo2.write(1750);
 }
 
 
@@ -51,7 +57,7 @@ servo2.attach(2, 1000, 2000);
 
 
 void loop() {
-    uint16_t sensors[3];
+    uint16_t sensors[4];
     int16_t position = qtr.readLineBlack(sensors);
     
     Serial.print("sensor1: ");
@@ -63,15 +69,39 @@ void loop() {
     Serial.print("sensor4: ");
     Serial.println(sensors[3]);
 
+    delay(100);
 
-    // 1000 means ON LINE OR EXPOSED TO MAX BRIGHTNESS
-    if(sensors[0] <((sensors[1]+sensors[2]+sensors[3])/3)) {
-        clockwise();
-    }
 
-    if(sensors[0] < 500 && sensors[2] > 500) {
+    // 900+ means LINE 
+    // 300 or less means NO LINE
+    // I represents line, o represents no line
+    
+    // easily change lower threshold 
+    int lower;
+    lower = 600; 
+    
+
+    // Iooo
+    if(sensors[0] > 900 && sensors[1] < lower && sensors[2] < lower && sensors[3] < lower ) {
         counterclockwise();
     }
 
-    delay(100);
+    // oooI
+    if(sensors[0] < lower && sensors[1] < lower && sensors[2] < lower && sensors[3] > 900) {
+        clockwise();
+    }
+
+    // oIIo
+    if(sensors[0] < lower && sensors[1] > 900 && sensors[2] > 900 && sensors[3] < lower) {
+        straight();
+    }
+
+    // error test
+    // if(sensors[0] > 900 && sensors[1] > 900 && sensors[2] > 900 && sensors[3] > 900) {
+    //     Serial.println("error");
+    // }
+
+    // oooo
+    // sweep clockwise ONLY 90 degrees and then sweep counterclockwise to make sure no backtracking happens
+
 }
