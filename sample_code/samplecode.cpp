@@ -67,7 +67,6 @@ void onConnectedGamepad(GamepadPtr gp) {
 
 void onDisconnectedGamepad(GamepadPtr gp) {
     bool foundGamepad = false;
-
     for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
         if (myGamepads[i] == gp) {
             // Console.printf("CALLBACK: Gamepad is disconnected from index=%d\n", i);
