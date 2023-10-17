@@ -3,10 +3,22 @@
 #error "Must only be compiled when using Bluepad32 Arduino platform"
 #endif  // !CONFIG_BLUEPAD32_PLATFORM_ARDUINO
 
+#include <Arduino.h>
 #include <Wire.h>
 #include <Arduino_APDS9960.h>
 #include <bits/stdc++.h>
 
+
+
+
+
+
+
+
+
+
+
+// IMPORTANT PLEASE READ
 // ONLY PLUG COLOR SENSOR INTO 3.3V
 // MUST use pins 21 (SDA) and 22 (SCL)
 //
@@ -15,8 +27,7 @@
 //
 //
 //
-
-// READ^^^^^^(please☹️🙏)
+// READ^^^^^^(please☹️🙏 dont burn the sensor like i did with the IR sensor)
 
 // color sensor definitions
 #define APDS9960_INT 2
@@ -58,7 +69,6 @@ void loop() {
     Serial.println(g);
     Serial.print("B: ");
     Serial.println(b);
-    Serial.print("AMBIENT: "); // ambient lighting 
+    Serial.print("AMBIENT: "); // ambient lighting... might be useful in determining reason for bad readings
     Serial.println(a);
-
 }
