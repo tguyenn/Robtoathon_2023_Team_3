@@ -94,13 +94,12 @@ void loop() {
     BP32.update();
     for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
         GamepadPtr controller = myGamepads[i];
-        //Serial.println("hehlloooo");
-        //Serial.println(sensor1.getDistanceFloat());
+        if (controller && controller->isConnected()) {
+
                 Serial.print("x-axis:" );
                 Serial.println(controller->axisX());
                 Serial.print("y-axis:" );
                 Serial.println(controller->axisY());
-        if (controller && controller->isConnected()) {
             // forward control (y-axis)
             servo1.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
             servo2.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
@@ -112,7 +111,6 @@ void loop() {
                 servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
             }
                 // +x
-                // :D
             if (controller->axisX() < 0.0f) {
                 servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
