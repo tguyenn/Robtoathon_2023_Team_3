@@ -10,18 +10,21 @@
 #include <ESP32SharpIR.h>
 #include <QTRSensors.h>
 
+// current setup only works from range of 9 cm to ~22 cm
+// 3 cm to 9 cm outputs 9.00 cm
+// 0 cm to 3 cm outputs bad values
+// CHANGE VALUES OF SET FILTERRATE TO GET BETTER RESULTS(?)
+
 ESP32SharpIR left(ESP32SharpIR::GP2Y0A21YK0F, 36);
 
 void setup()  {
     Serial.begin(115200);
-    // left.setFilterRate(0.1f); // works if you adjust filter rate properly (?)
+    left.setFilterRate(0.5f); // works if you adjust filter rate properly (?)
 }
 
 void loop() {
-
-    Serial.println("test");
-    // Serial.println(left.getDistanceFloat()); // this function doesnt work for whatever reason idrk why. 
+    Serial.println(left.getDistanceFloat()); // this function doesnt work for whatever reason idrk why. 
     // it might be because the filter rate was not right??
-    Serial.println(left.getRawDistance()); // works and produces stable output but not in cm or units of measure
-    delay(500);
+    // Serial.println(left.getRawDistance()); // works and produces stable output but not in cm or units of measure?
+    delay(100);
 }
