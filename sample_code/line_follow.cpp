@@ -1,4 +1,5 @@
 #include "sdkconfig.h"
+#include<iostream>
 #ifndef CONFIG_BLUEPAD32_PLATFORM_ARDUINO
 #error "Must only be compiled when using Bluepad32 Arduino platform"
 #endif  // !CONFIG_BLUEPAD32_PLATFORM_ARDUINO
@@ -76,22 +77,22 @@ void loop() {
     // I represents line, o represents no line
     
     // easily change lower threshold 
-    int lower, upper;
+    int lower;
     lower = 600; 
-    upper = 900;    
+    
 
     // Iooo
-    if(sensors[0] > upper && sensors[1] < lower && sensors[2] < lower && sensors[3] < lower ) {
+    if(sensors[0] > 900 && sensors[1] < lower && sensors[2] < lower && sensors[3] < lower ) {
         counterclockwise();
     }
 
     // oooI
-    if(sensors[0] < lower && sensors[1] < lower && sensors[2] < lower && sensors[3] > upper) {
+    if(sensors[0] < lower && sensors[1] < lower && sensors[2] < lower && sensors[3] > 900) {
         clockwise();
     }
 
     // oIIo
-    if(sensors[0] < lower && sensors[1] > upper && sensors[2] > upper && sensors[3] < lower) {
+    if(sensors[0] < lower && sensors[1] > 900 && sensors[2] > 900 && sensors[3] < lower) {
         straight();
     }
 
