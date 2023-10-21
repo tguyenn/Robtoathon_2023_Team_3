@@ -56,7 +56,7 @@ uint8_t ESP32SharpIR::getRawDistance( bool avoidBurstRead ) {
 
       distance = (28400) / (analogRead(pin));
       if (distance > 80) return 81;
-      else if (distance < 10) return 9;
+      // else if (distance < 10) return 9;
       else return distance;
 
       break;
