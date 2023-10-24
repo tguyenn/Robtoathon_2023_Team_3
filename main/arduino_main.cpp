@@ -69,9 +69,9 @@ void onDisconnectedGamepad(GamepadPtr gp) {
 }
 
  
-Servo servo1; // declare servo objects
-Servo servo2; 
-
+Servo servo1; // declare objects
+Servo servo2;
+Servo mecharm;
 QTRSensors qtr;
 
 void setup() {
@@ -82,6 +82,7 @@ void setup() {
     servo2.setPeriodHertz(50); // servo expects a pulse ~20 ms
     servo1.attach(2, 1000, 2000); // configures pin 13 ususth min/max pulse widths 
     servo2.attach(15, 1000, 2000); // configures pin 13 with min/max pulse widths
+    mecharm.attach(0, 1000, 2000);
 
     Serial.begin(115200);
     sensor1.setFilterRate(0.1f);
@@ -96,29 +97,48 @@ void loop() {
         GamepadPtr controller = myGamepads[i];
         if (controller && controller->isConnected()) {
 
+            /* button testing
+            ◯ - color detection (B)
+            △ - line follow (Y)
+            □ - wall follow (X)
+            ╳ - normal drive (A)
+
+            l1 - launcher arm clockwise
+            r2 - launcher arm counterclockwise
+            */
+           
+            Serial.print(controller->a());
+            Serial.print(controller->b());
+            Serial.print(controller->x());
+            Serial.print(controller->y());
+            Serial.print(controller->l1());
+            Serial.print(controller->r1());
+
             Serial.print("x-axis: ");
             Serial.print(controller->axisX());
             Serial.print(" y-axis: ");
-            Serial.println(controller->axisY());
-            // forward control (y-axis)
-            // servo1.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
-            // servo2.write(((((float) controller->axisY()) / 512.0f) * 500) + 1500);
+            Serial.println(controller->axisRY());
+            // forward control (RIGHT JOYSTICK)
+            servo1.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
+            servo2.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
 
-            // turning control (x-axis)
+            // turning control (LEFT JOYSTICK)
                 // -x
             if (controller->axisX() > 0.0f) {
                 servo1.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-                Serial.print("1");
+                // Serial.println("1");
             }
                 // +x
             if (controller->axisX() < 0.0f) {
                 servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-                Serial.print("2");
+                // Serial.print("2");
             }
         }
     }
         vTaskDelay(1);
 
 }
+
+//arduino main with more controller stuff
