@@ -15,7 +15,6 @@ limitations under the License.
 ****************************************************************************/
 
 #include "sdkconfig.h"
-//#include<iostream>
 #ifndef CONFIG_BLUEPAD32_PLATFORM_ARDUINO
 #error "Must only be compiled when using Bluepad32 Arduino platform"
 #endif  // !CONFIG_BLUEPAD32_PLATFORM_ARDUINO
@@ -98,19 +97,19 @@ void loop() {
         if (controller && controller->isConnected()) {
 
             /* button testing
-            ◯ - color detection (B)
-            △ - line follow (Y)
-            □ - wall follow (X)
-            ╳ - normal drive (A)
+             color detection (B)
+             line follow (Y)
+             wall follow (X)
+             normal drive (A)
 
             l1 - launcher arm clockwise
             r2 - launcher arm counterclockwise
             */
            
-            Serial.print(controller->a());
-            Serial.print(controller->b());
-            Serial.print(controller->x());
-            Serial.print(controller->y());
+            Serial.print(controller->a()); // b on remote
+            Serial.print(controller->b()); // a on remote
+            Serial.print(controller->x()); // y on remote
+            Serial.print(controller->y()); // x on remote
             Serial.print(controller->l1());
             Serial.print(controller->r1());
 
@@ -135,8 +134,26 @@ void loop() {
                 servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 // Serial.print("2");
             }
+
+            if (controller->b()) {
+
+                while(1) { // want a while loop that will ALWAYS run
+                    Serial.println(controller->a() );
+                    delay(1000);
+                    // Serial.print("while loop"); 
+                // //     Serial.print("holy moly it works?!?!?!?");
+                // //     if(controller->a() == 1) {
+                    if(controller->a() == 1) {
+                        break;
+                    }
+                }
+                // }
+            }
         }
     }
+
+
+
         vTaskDelay(1);
 
 }
