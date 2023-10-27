@@ -26,6 +26,8 @@ limitations under the License.
 #include <ESP32SharpIR.h>
 #include <QTRSensors.h>
 
+#define LED 4
+
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 
 ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27);
@@ -76,6 +78,7 @@ QTRSensors qtr;
 void setup() {
     BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
     BP32.forgetBluetoothKeys(); 
+    pinMode(LED,OUTPUT);
 
     servo1.setPeriodHertz(50); // servo expects a pulse ~20 ms
     servo2.setPeriodHertz(50); // servo expects a pulse ~20 ms
@@ -112,6 +115,7 @@ void loop() {
             Serial.print(controller->y()); // x on remote
             Serial.print(controller->l1());
             Serial.print(controller->r1());
+            
 
             Serial.print("x-axis: ");
             Serial.print(controller->axisX());
@@ -138,16 +142,22 @@ void loop() {
             if (controller->b()) {
 
                 while(1) { // want a while loop that will ALWAYS run
+                    BP32.update();
                     Serial.println(controller->a() );
-                    delay(1000);
-                    // Serial.print("while loop"); 
-                // //     Serial.print("holy moly it works?!?!?!?");
-                // //     if(controller->a() == 1) {
+
+                        digitalWrite(LED,LOW);
+                        Serial.println("low");
+                        delay(500);
+                        digitalWrite(LED,HIGH);
+                        Serial.println("high");
+                        delay(500);
+
                     if(controller->a() == 1) {
+                        digitalWrite(LED,LOW);
                         break;
+                    
                     }
                 }
-                // }
             }
         }
     }
