@@ -138,6 +138,16 @@ void loop() {
                 servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 // Serial.print("2");
             }
+            
+             if (controller->l1() == 1){
+                Serial.print("clockwise");
+                mecharm.write(1000);
+            }
+
+            if (controller->r1() == 1){
+                Serial.print("counter-clockwise");
+                mecharm.write(2000);
+            }
 
             if (controller->b()) {
 
