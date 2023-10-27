@@ -29,7 +29,7 @@ void setup()  {
 // servo 1 ( left side ) <1500 foward, >1500 backwards
 // servo 2 ( right side ) >1500 foward, <1500 backwards
 
-void loop() {
+void Wall_Follow() {
     Serial.print("Front Sensor: ");
     Serial.println(front.getDistanceFloat());
     Serial.print("Left Sensor: "); 
