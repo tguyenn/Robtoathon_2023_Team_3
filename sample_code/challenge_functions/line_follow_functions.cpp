@@ -20,7 +20,7 @@ void straight() {
     servo2.write(1750);
 }
 
-void line_setup() {
+void lineSetup() {
 // set up Serial Communication and sensor pins 
 // Serial.begin(115200);
 
@@ -28,7 +28,6 @@ void line_setup() {
 public int lower, upper;
 lower = 600; 
 upper = 900;   
-
 
 qtr.setTypeRC(); // or setTypeAnalog() 
 qtr.setSensorPins ((const uint8_t []) {12, 14, 27, 26}, 4);
@@ -41,13 +40,12 @@ servo2.attach(2);
         qtr.calibrate();
         delay(20);
     }
-        // easily change lower threshold 
  
 
 }
 
 
-void line_loop() {
+void lineLoop() {
     uint16_t sensors[4];
     int16_t position = qtr.readLineBlack(sensors);
     
