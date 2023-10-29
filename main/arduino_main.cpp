@@ -78,30 +78,29 @@ void straight() {
     servo2.write(1750);
 }
 
-void lineSetup() {
-
-// set thresholds easily
-public int lower, upper;
-lower = 600; 
-upper = 900;   
-
-qtr.setTypeRC(); // or setTypeAnalog() 
-qtr.setSensorPins ((const uint8_t []) {12, 14, 27, 26}, 4);
-// calibration sequence
-// TO DO: ADD SWEEPING MOTION SO NO JANKY CALIBRATION BY HAND
-    for (uint8_t i = 0; i < 250; i++) {
-        Serial.println("calibrating"); 
-        qtr.calibrate();
-        delay(20);
-    }
- 
-
+void lineSetup() {  
+    qtr.setTypeRC(); // or setTypeAnalog() 
+    qtr.setSensorPins ((const uint8_t []) {12, 14, 27, 26}, 4);
+    // int counter;
+    // calibration sequence
+    // TO DO: ADD SWEEPING MOTION SO NO JANKY CALIBRATION BY HAND
+        for (uint8_t i = 0; i < 250; i++) {
+            // servo1.write
+            // if(i = counter)
+            Serial.println("calibrating"); 
+            qtr.calibrate();
+            delay(20);
+        }  
 }
 
 void lineLoop() {
     uint16_t sensors[4];
     int16_t position = qtr.readLineBlack(sensors);
-    
+    // set thresholds easily
+    int lower, upper;
+    lower = 600; 
+    upper = 900; 
+
     Serial.print("sensor1: ");
     Serial.println(sensors[0]);
     Serial.print("sensor2: ");
@@ -111,7 +110,7 @@ void lineLoop() {
     Serial.print("sensor4: ");
     Serial.println(sensors[3]);
 
-    delay(100);
+    delay(100); // might need to disable for comp
 
     // 900+ means LINE 
     // 300 or less means NO LINE
@@ -131,6 +130,14 @@ void lineLoop() {
     if(sensors[0] < lower && sensors[1] > upper && sensors[2] > upper && sensors[3] < lower) {
         straight();
     }
+
+    // oooo
+    if(sensors[0] < 300 && sensors[1] < 300 && sensors[2] < 300 && sensors[3] < 300) {
+        // SPIN CLOCKWISE IN PLACE
+        Serial.println("error");
+        servo1.write(1750);
+        servo2.write(1250);
+    }
 }
 
 
@@ -140,7 +147,6 @@ void lineLoop() {
 void setup() {
     BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
     BP32.forgetBluetoothKeys(); 
-    pinMode(LED,OUTPUT);
 
     servo1.setPeriodHertz(50);
     servo2.setPeriodHertz(50);
@@ -165,20 +171,23 @@ void loop() {
              wall follow (X)
              normal drive (B)
 
-            l1 - launcher arm clockwise
-            r2 - launcher arm counterclockwise
+            launcher arm clockwise (L1)
+            launcher arm counterclockwise (R1)
             */
            
-            Serial.print(controller->a()); // b on remote
-            Serial.print(controller->b()); // a on remote
-            Serial.print(controller->x()); // y on remote
-            Serial.print(controller->y()); // x on remote
+           // controller output to serial monitor
+            Serial.print(controller->a()); 
+            Serial.print(controller->b()); 
+            Serial.print(controller->x()); 
+            Serial.print(controller->y()); 
             Serial.print(controller->l1());
             Serial.print(controller->r1());
             Serial.print("x-axis: ");
             Serial.print(controller->axisX());
             Serial.print(" y-axis: ");
             Serial.println(controller->axisRY());
+
+
             // forward/backward control (RIGHT JOYSTICK Y-AXIS)
             servo1.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
             servo2.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
@@ -200,7 +209,10 @@ void loop() {
 
             // LINE FOLLOW (PHYSICAL BUTTON A)
             if (controller->b()) { 
-                while(1) { // want a while loop that will ALWAYS run
+
+                
+
+                while(1) {
                     BP32.update();
                     Serial.println(controller->a() );
 
@@ -209,7 +221,6 @@ void loop() {
 
                     if(controller->a() == 1) {
                         break;
-                    
                     }
                 }
             }
@@ -219,6 +230,11 @@ void loop() {
                 while(1) {
                     BP32.update();
                     // loop code here
+                    Serial.print("WALL FOLLOWING");
+
+                    if(controller->a() == 1) {
+                        break;
+                    }
                 }
             }
 
@@ -226,15 +242,15 @@ void loop() {
             if (controller->y()) {
                 while(1) {
                     BP32.update();
+                    Serial.print("COLOR SAMPLING");
+
+                    if(controller->a() == 1) {
+                        break;
                     // setup and loop code here
+                    }
                 }
             }
-
-        }
     }
-
-
-
         vTaskDelay(1);
-
+    }
 }
