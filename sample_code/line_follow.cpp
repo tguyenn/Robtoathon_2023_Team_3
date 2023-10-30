@@ -44,8 +44,8 @@ Serial.begin(115200);
 qtr.setTypeRC(); // or setTypeAnalog() 
 qtr.setSensorPins ((const uint8_t []) {12, 14, 27, 26}, 4);
 
-servo1.attach(15, 1000, 2000);
-servo2.attach(2, 1000, 2000);
+servo1.attach(15);
+servo2.attach(2);
 // calibration sequence
     for (uint8_t i = 0; i < 250; i++) {
         Serial.println("calibrating"); 
