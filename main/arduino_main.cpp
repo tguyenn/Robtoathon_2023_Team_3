@@ -85,8 +85,12 @@ void lineSetup() {
     // calibration sequence
     // TO DO: ADD SWEEPING MOTION SO NO JANKY CALIBRATION BY HAND
         for (uint8_t i = 0; i < 250; i++) {
-            // servo1.write
-            // if(i = counter)
+            servo1.write(1750);
+            int counter = 30;
+            if(i = counter) {
+                counter == i + 30;
+
+            }
             Serial.println("calibrating"); 
             qtr.calibrate();
             delay(20);
