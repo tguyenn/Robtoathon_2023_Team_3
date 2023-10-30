@@ -19,7 +19,7 @@
 #define I2C_SDA 21
 #define I2C_SCL 22
 #define I2C_FREQ 100000
-
+//#define LED 2
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27);
 Servo servo1;
@@ -80,6 +80,10 @@ void color_setup() {
     apds.setInterruptPin(APDS9960_INT);
     apds.begin();
     Serial.begin(115200);
+    servo1.attach(15); 
+    servo2.attach(2); 
+
+    
 }
 
 char color_detector(int r, int g, int b, int a) {
@@ -101,6 +105,7 @@ char color_detector(int r, int g, int b, int a) {
     return char_to_return;
 }
 void color_challenge() {
+    color_setup();
     //This counter is just to keep track of time. 
     int counter = 0;
     //this boolean says if we have found the final color or not. 
@@ -122,14 +127,12 @@ void color_challenge() {
     //this guy helps with the part of the code that flashes a certain number of times 
     //to signal what color the sample was
     bool flash_has_happened = false;
-
-    //This thing needs to run right at the beginning it's to initialize the color or something idk
-    while (!apds.colorAvailable()) {
-        delay(5);
-    }
-
+    int test_val=1000;
     while (final_color_found == false) {
-        
+        //This thing needs to run right at the beginning it's to initialize the color or something idk
+        while (!apds.colorAvailable()) {
+            delay(5);
+        }
         //these two lines help with the function that determines what color we are currently on.
         apds.readColor(r, g, b, a); //assigns color ints a value based on sensor
         last_color_detected = color_detector(r,g,b,a); //takes in color ints and returns whatever the strongest one is
@@ -140,6 +143,8 @@ void color_challenge() {
         if ((counter>50) && (counter<90))
         {
             sample_color = last_color_detected;
+            Serial.println("The sample color is...");
+            Serial.println(sample_color);
         }
 
         //rest of the time we need to be moving forward and scanning what color we are on
@@ -151,7 +156,7 @@ void color_challenge() {
 
             //this if statement runs ONE TIME. It flashes a few times to let the user know what sample color
             //it thinks is correct.
-            if (flash_has_happened == false) {
+           /* if (flash_has_happened == false) {
 
                 if (sample_color == 'r') {
                     //do red flash
@@ -199,13 +204,14 @@ void color_challenge() {
 
                 flash_has_happened = true;
             }
-
+            */
 
             //move forward continuously
+           
             servo1.writeMicroseconds(1000);
             servo2.writeMicroseconds(2000);
 
-
+            Serial.println(last_color_detected);
             if ((last_color_detected == sample_color) && (new_color_found == true)) {
 
                 Serial.println("I HAVE FOUND A COLOR MATCHING THE SAMPLE COLOR");
@@ -263,8 +269,8 @@ void lineSetup() {
         for (uint8_t i = 0; i < 250; i++) {
             servo1.write(1750);
             int counter = 30;
-            if(i = counter) {
-                counter == i + 30;
+            if(i == counter) {
+                counter = i + 30;
 
             }
             Serial.println("calibrating"); 
@@ -328,14 +334,17 @@ void setup() {
     BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
     BP32.forgetBluetoothKeys(); 
 
-    servo1.setPeriodHertz(50);
-    servo2.setPeriodHertz(50);
-    servo1.attach(2); 
-    servo2.attach(15); 
+    // servo1.setPeriodHertz(50);
+    // servo2.setPeriodHertz(50);
+    servo1.attach(15); 
+    servo2.attach(2); 
     mecharm.attach(0);
 
     Serial.begin(115200);
     sensor1.setFilterRate(0.1f);
+
+    //led setup
+    //pinMode(LED,OUTPUT);
     
 }
 
@@ -420,7 +429,6 @@ void loop() {
 
             // COLOR DETECTION (PHYSICAL BUTTON Y probably)
             if (controller->y()) {
-                color_setup();
                 while(1) {
                     BP32.update();
                     Serial.print("COLOR SAMPLING");
