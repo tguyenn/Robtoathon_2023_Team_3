@@ -22,6 +22,9 @@
 //#define LED 2
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27);
+ESP32SharpIR front(ESP32SharpIR::GP2Y0A21YK0F, 36);
+ESP32SharpIR right(ESP32SharpIR::GP2Y0A21YK0F, 39);
+ESP32SharpIR left(ESP32SharpIR::GP2Y0A21YK0F, 34);
 Servo servo1;
 Servo servo2;
 Servo mecharm;
@@ -68,7 +71,6 @@ void onDisconnectedGamepad(GamepadPtr gp) {
     }
 }
 
-// WALL FOLLOW FUNCTIONS
 
 // COLOR DETECTION FUNCTIONS
 
@@ -82,9 +84,57 @@ void color_setup() {
     Serial.begin(115200);
     servo1.attach(15); 
     servo2.attach(2); 
-
-    
 }
+
+// WALL FOLLOW FUNCTIONS
+
+void wall_setup()  {
+    front.setFilterRate(0.5f);
+    left.setFilterRate(0.5f);
+    right.setFilterRate(0.5f);
+    servo1.attach(15);
+    servo2.attach(2);
+}
+
+void Wall_Follow() {
+    wall_setup();
+    Serial.print("Front Sensor: ");
+    Serial.println(front.getDistanceFloat());
+    Serial.print("Left Sensor: "); 
+    Serial.println(left.getDistanceFloat());
+    Serial.print("Right Sensor: ");
+    Serial.println(right.getDistanceFloat());
+
+    if(front.getDistanceFloat() >= 15.00){
+        Serial.println("Continue Straight");
+        servo1.write(1000);
+        servo2.write(2000);
+        delay(100);
+    }
+    else if((right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() >= 15.00)){
+        Serial.println("Turn Right 2");
+        servo1.writeMicroseconds(500);
+        servo2.writeMicroseconds(500);
+        delayMicroseconds(725000);
+    }
+    else if((front.getDistanceFloat() < 15.00)&&(right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() < 15.00)) {
+        Serial.println("Turn Right");
+        servo1.writeMicroseconds(500);
+        servo2.writeMicroseconds(500);
+        delayMicroseconds(725000);
+    }   
+    else if((front.getDistanceFloat() < 15.00) && (left.getDistanceFloat() >= 15.00) && (right.getDistanceFloat() < 15.00)) {
+        Serial.println("Turn Left");
+        servo1.writeMicroseconds(2500);
+        servo2.writeMicroseconds(2500);
+        delayMicroseconds(725000);
+    }
+    // else{
+    //     Serial.println("Stop");
+    //     servo1.write(1500);
+    //     servo2.write(1500);
+    // }
+} 
 
 char color_detector(int r, int g, int b, int a) {
 
@@ -398,9 +448,6 @@ void loop() {
 
             // LINE FOLLOW (PHYSICAL BUTTON A)
             if (controller->b()) { 
-
-                
-
                 while(1) {
                     BP32.update();
                     Serial.println(controller->a() );
@@ -414,24 +461,24 @@ void loop() {
                 }
             }
 
-            // WALL FOLLOW (PHYSICAL BUTTON X probably)
+            // WALL FOLLOW (PHYSICAL BUTTON Y probably)
             if (controller->x()) {
+                    Serial.print("WALL FOLLOWING");
                 while(1) {
                     BP32.update();
                     // loop code here
-                    Serial.print("WALL FOLLOWING");
-
+                    Wall_Follow();
                     if(controller->a() == 1) {
                         break;
                     }
                 }
             }
 
-            // COLOR DETECTION (PHYSICAL BUTTON Y probably)
+            // COLOR DETECTION (PHYSICAL BUTTON X probably)
             if (controller->y()) {
+                    Serial.print("COLOR SAMPLING");
                 while(1) {
                     BP32.update();
-                    Serial.print("COLOR SAMPLING");
                     color_challenge();
                     if(controller->a() == 1) {
                         break;
