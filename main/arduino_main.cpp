@@ -19,7 +19,7 @@
 #define I2C_SDA 21
 #define I2C_SCL 22
 #define I2C_FREQ 100000
-//#define LED 2
+#define LED 2
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27);
 ESP32SharpIR front(ESP32SharpIR::GP2Y0A21YK0F, 36);
@@ -52,6 +52,13 @@ void onConnectedGamepad(GamepadPtr gp) {
     }
     if (!foundEmptySlot) {
         // Console.println("CALLBACK: Gamepad connected, but could not found empty slot");
+    }
+}
+
+void delay_custom(int wait_val) {
+    int i = 0;
+    while (i < wait_val) {
+        i+=1;
     }
 }
 
@@ -89,9 +96,9 @@ void color_setup() {
 // WALL FOLLOW FUNCTIONS
 
 void wall_setup()  {
-    front.setFilterRate(0.5f);
-    left.setFilterRate(0.5f);
-    right.setFilterRate(0.5f);
+    front.setFilterRate(0.1f);
+    left.setFilterRate(0.1f);
+    right.setFilterRate(0.1f);
     servo1.attach(15);
     servo2.attach(2);
 }
@@ -105,30 +112,37 @@ void Wall_Follow() {
     Serial.print("Right Sensor: ");
     Serial.println(right.getDistanceFloat());
 
+
     if(front.getDistanceFloat() >= 15.00){
         Serial.println("Continue Straight");
-        servo1.write(1000);
-        servo2.write(2000);
+        servo1.writeMicroseconds(1000);
+        servo2.writeMicroseconds(2000);
         delay(100);
     }
-    else if((right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() >= 15.00)){
-        Serial.println("Turn Right 2");
-        servo1.writeMicroseconds(500);
-        servo2.writeMicroseconds(500);
-        delayMicroseconds(725000);
-    }
-    else if((front.getDistanceFloat() < 15.00)&&(right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() < 15.00)) {
+    else {
         Serial.println("Turn Right");
-        servo1.writeMicroseconds(500);
-        servo2.writeMicroseconds(500);
-        delayMicroseconds(725000);
-    }   
-    else if((front.getDistanceFloat() < 15.00) && (left.getDistanceFloat() >= 15.00) && (right.getDistanceFloat() < 15.00)) {
-        Serial.println("Turn Left");
-        servo1.writeMicroseconds(2500);
-        servo2.writeMicroseconds(2500);
-        delayMicroseconds(725000);
+        servo1.writeMicroseconds(1000);
+        servo2.writeMicroseconds(1000);
+        delay(660);
     }
+    // else if((right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() >= 15.00)){
+    //     Serial.println("Turn Right 2");
+    //     servo1.writeMicroseconds(500);
+    //     servo2.writeMicroseconds(500);
+    //     delay_custom(750);
+    // }
+    // else if((front.getDistanceFloat() < 15.00)&&(right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() < 15.00)) {
+    //     Serial.println("Turn Right");
+    //     servo1.writeMicroseconds(1000);
+    //     servo2.writeMicroseconds(1000);
+    //     delay_custom(550);
+    // }   
+    // else if((front.getDistanceFloat() < 15.00) && (left.getDistanceFloat() >= 15.00) && (right.getDistanceFloat() < 15.00)) {
+    //     Serial.println("Turn Left");
+    //     servo1.writeMicroseconds(2500);
+    //     servo2.writeMicroseconds(2500);
+    //     delay_custom(500);
+    // }
     // else{
     //     Serial.println("Stop");
     //     servo1.write(1500);
@@ -206,7 +220,7 @@ void color_challenge() {
 
             //this if statement runs ONE TIME. It flashes a few times to let the user know what sample color
             //it thinks is correct.
-           /* if (flash_has_happened == false) {
+            if (flash_has_happened == false) {
 
                 if (sample_color == 'r') {
                     //do red flash
@@ -254,7 +268,7 @@ void color_challenge() {
 
                 flash_has_happened = true;
             }
-            */
+            
 
             //move forward continuously
            
@@ -266,6 +280,7 @@ void color_challenge() {
 
                 Serial.println("I HAVE FOUND A COLOR MATCHING THE SAMPLE COLOR");
                 final_color_found = true; 
+                delay(100);
                 //END PROGRAM
 
             }
@@ -480,10 +495,11 @@ void loop() {
                 while(1) {
                     BP32.update();
                     color_challenge();
-                    if(controller->a() == 1) {
-                        break;
+                   // if(controller->a() == 1) {
+                    //    break;
+                    break;
                     // setup and loop code here
-                    }
+                   // }
                 }
             }
     }
