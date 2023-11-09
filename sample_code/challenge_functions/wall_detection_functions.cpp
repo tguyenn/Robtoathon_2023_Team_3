@@ -1,4 +1,4 @@
-void setup()  {
+void setupWall()  {
     Serial.begin(115200);
     front.setFilterRate(0.5f);
     left.setFilterRate(0.5f);
@@ -7,7 +7,7 @@ void setup()  {
     servo2.attach(2);
 }
 
-void loop() {
+void loopWall() {
     Serial.print("Front Sensor: ");
     Serial.println(front.getDistanceFloat());
     Serial.print("Left Sensor: "); 

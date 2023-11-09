@@ -96,7 +96,7 @@ void loop() {
     }
 
     // error test
-    // if(sensors[0] > 900 && sensors[1] > 900 && sensors[2] > 900 && sensors[3] > 900) {
+    // if(sensors[0] < 300 && sensors[1] < 300 && sensors[2] < 300 && sensors[3] < 300) {
     //     Serial.println("error");
     // }
 
