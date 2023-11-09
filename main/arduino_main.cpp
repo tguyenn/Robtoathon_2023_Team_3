@@ -19,6 +19,9 @@
 #define I2C_SDA 21
 #define I2C_SCL 22
 #define I2C_FREQ 100000
+#define RLED 16
+#define GLED 17
+#define BLED 5
 #define LED 2
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27);
@@ -191,7 +194,7 @@ void color_challenge() {
     //this guy helps with the part of the code that flashes a certain number of times 
     //to signal what color the sample was
     bool flash_has_happened = false;
-    int test_val=1000;
+    // int test_val=1000;
     while (final_color_found == false) {
         //This thing needs to run right at the beginning it's to initialize the color or something idk
         while (!apds.colorAvailable()) {
@@ -309,7 +312,7 @@ void color_challenge() {
 // LINE FOLLOW FUNCTIONS
 void clockwise() {
     Serial.println("clockwise clockwise clockwise clockwise clockwise");
-    servo1.write(1750);
+    servo1.write(1250);
     servo2.write(1500);
 }
 
@@ -321,7 +324,7 @@ void counterclockwise() {
 
 void straight() {
     Serial.println("straight straight straight straight straight straight");
-    servo1.write(1750); 
+    servo1.write(1250); 
     servo2.write(1750);
 }
 
@@ -331,22 +334,23 @@ void lineSetup() {
     // int counter;
     // calibration sequence
     // TO DO: ADD SWEEPING MOTION SO NO JANKY CALIBRATION BY HAND
-        for (uint8_t i = 0; i < 250; i++) {
-            servo1.write(1750);
-            int counter = 30;
-            if(i == counter) {
-                counter = i + 30;
-
-            }
+        for (uint8_t i = 0; i < 250; i++) {            
             Serial.println("calibrating"); 
+            Serial.print(i);
+
             qtr.calibrate();
             delay(20);
+            // NEED TO FIND WAY TO DEFINE CONTROLLER OBJECT GLOBALLY
+            // if(controller->a() == 1) {
+            //             break;
+            // }
         }  
 }
 
 void lineLoop() {
     uint16_t sensors[4];
     int16_t position = qtr.readLineBlack(sensors);
+    position = position + 1; // gets rid of annoying warning... idk why we need this value lol
     // set thresholds easily
     int lower, upper;
     lower = 600; 
@@ -361,7 +365,7 @@ void lineLoop() {
     Serial.print("sensor4: ");
     Serial.println(sensors[3]);
 
-    delay(100); // might need to disable for comp
+    delay(50); // might need to disable for comp
 
     // 900+ means LINE 
     // 300 or less means NO LINE
@@ -385,9 +389,9 @@ void lineLoop() {
     // oooo
     if(sensors[0] < 300 && sensors[1] < 300 && sensors[2] < 300 && sensors[3] < 300) {
         // SPIN CLOCKWISE IN PLACE
-        Serial.println("error");
-        servo1.write(1750);
-        servo2.write(1250);
+        // Serial.println("error");
+        // servo1.write(1750);
+        // servo2.write(1750);
     }
 }
 
@@ -407,6 +411,10 @@ void setup() {
 
     Serial.begin(115200);
     sensor1.setFilterRate(0.1f);
+
+    pinMode(RLED, OUTPUT);
+    pinMode(GLED, OUTPUT);
+    pinMode(BLED, OUTPUT);
 
     //led setup
     //pinMode(LED,OUTPUT);
@@ -441,8 +449,9 @@ void loop() {
             Serial.print(" y-axis: ");
             Serial.println(controller->axisRY());
 
-            
-
+            analogWrite(RLED, 200);
+            analogWrite(GLED, 0);
+            analogWrite(BLED, 200);
 
             // forward/backward control (RIGHT JOYSTICK Y-AXIS)
             servo1.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
@@ -451,14 +460,20 @@ void loop() {
             // turning control (LEFT JOYSTICK X-AXIS)
                 // -x
             if (controller->axisX() > 0.0f) {
-                servo1.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
+                analogWrite(RLED, 0);
+                analogWrite(GLED, 200);
+                analogWrite(BLED, 0);
+                servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 // Serial.println("1");
             }
                 // +x
             if (controller->axisX() < 0.0f) {
+                analogWrite(RLED, 0);
+                analogWrite(GLED, 0);
+                analogWrite(BLED, 200);
                 servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-                servo2.write((-1) * ((((float) controller->axisX()) / 512.0f) * 500) + 1500);
+                servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 // Serial.print("2");
             }
 
@@ -477,11 +492,11 @@ void loop() {
 
             // LINE FOLLOW (PHYSICAL BUTTON A)
             if (controller->b()) { 
+                lineSetup();
                 while(1) {
                     BP32.update();
                     Serial.println(controller->a() );
 
-                    lineSetup();
                     lineLoop();
 
                     if(controller->a() == 1) {
