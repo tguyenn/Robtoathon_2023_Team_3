@@ -20,8 +20,8 @@
 #define I2C_SCL 22
 #define I2C_FREQ 100000
 #define RLED 16
-#define GLED 17
-#define BLED 5
+#define GLED 5
+#define BLED 17
 #define LED 2
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27); // what is this for???
@@ -227,44 +227,20 @@ void color_challenge() {
 
                 if (sample_color == 'r') {
                     //do red flash
-                    digitalWrite(LED,LOW);
-                    delay(1000);
-                    digitalWrite(LED,HIGH);
-                    delay(1000);
-                    digitalWrite(LED,LOW);
+                    digitalWrite(RLED,HIGH);
                     delay(1000);
                     Serial.println("SAMPLE COLOR FINAL IS RED");
 
                 }
                 else if (sample_color == 'g') {
                     //do green flash
-                    digitalWrite(LED,LOW);
-                    delay(1000);
-                    digitalWrite(LED,HIGH);
-                    delay(1000);
-                    digitalWrite(LED,LOW);
-                    delay(1000);
-                    digitalWrite(LED,HIGH);
-                    delay(1000);
-                    digitalWrite(LED,LOW);
+                    digitalWrite(GLED,HIGH);
                     delay(1000);
                     Serial.println("SAMPLE COLOR FINAL IS GREEN");
                 }
                 else if (sample_color == 'b') {
                     //do blue flash
-                    digitalWrite(LED,LOW);
-                    delay(1000);
-                    digitalWrite(LED,HIGH);
-                    delay(1000);
-                    digitalWrite(LED,LOW);
-                    delay(1000);
-                    digitalWrite(LED,HIGH);
-                    delay(1000);
-                    digitalWrite(LED,LOW);
-                    delay(1000);
-                    digitalWrite(LED,HIGH);
-                    delay(1000);
-                    digitalWrite(LED,LOW);
+                    digitalWrite(BLED,HIGH);
                     delay(1000);
                     Serial.println("SAMPLE COLOR FINAL IS BLUE");
                 }
@@ -328,16 +304,34 @@ void straight() {
     servo2.write(1750);
 }
 
+
 void lineSetup() {  
     qtr.setTypeRC(); 
     qtr.setSensorPins ((const uint8_t []) {12, 14, 27, 26}, 4);
+    int counter1 = 0;
+    int counter2 = 0;
     // calibration sequence
     // TO DO: ADD SWEEPING MOTION SO NO JANKY CALIBRATION BY HAND
         for (uint8_t i = 0; i < 250; i++) {            
             Serial.print("calibrating"); 
             Serial.println(i);
             qtr.calibrate();
-            delay(20);
+
+            if(i - counter1 >= 15) {
+                counter1 = i;
+                servo1.write(1250);
+                servo2.write(1250);
+            }
+            if(i - counter2 >= 30) {
+                counter2 = i;
+                servo1.write(1750);
+                servo2.write(1750);
+            }
+
+            if(i == 245) {
+                servo1.write(1500);
+                servo2.write(1500);
+            }
             // NEED TO FIND WAY TO DEFINE CONTROLLER OBJECT GLOBALLY TO CANCEL
             // if(controller->a() == 1) {
             //             break;
@@ -348,12 +342,14 @@ void lineSetup() {
 void lineLoop() {
     uint16_t sensors[4];
     int16_t position = qtr.readLineBlack(sensors);
-    position = position + 1; // gets rid of annoying warning... idk why we need this value lol
+    position = position + 1; // gets rid of annoying warning... idk why we need this but program breaks when deleted
+    
     // set thresholds easily
-    int lower, upper;
+    int lower, upper, timer;
     lower = 600; 
     upper = 900; 
-
+    timer = 0;
+    
     Serial.print("sensor1: ");
     Serial.println(sensors[0]);
     Serial.print("sensor2: ");
@@ -386,10 +382,15 @@ void lineLoop() {
 
     // oooo
     if(sensors[0] < 300 && sensors[1] < 300 && sensors[2] < 300 && sensors[3] < 300) {
-        // SPIN CLOCKWISE IN PLACE
+        // SPIN IN PLACE
         // Serial.println("error");
-        // servo1.write(1750);
-        // servo2.write(1750);
+        timer++;
+        if(timer == 250) {
+            servo1.write(1750);
+            servo2.write(1750);
+            timer = 0;
+        }
+
     }
 }
 
@@ -429,8 +430,8 @@ void loop() {
 
             /* ACTUAL BUTTONS
              line follow (A)
-             color detection (Y)
-             wall follow (X)
+             color detection (X)
+             wall follow (Y)
              normal drive (B)
 
             launcher arm clockwise (L1)
@@ -448,30 +449,15 @@ void loop() {
             Serial.print(" x-axis: ");
             Serial.print(controller->axisX());
             Serial.print(" y-axis: ");
-            Serial.println(controller->axisRY());
-
-            
-            Serial.print("Front Sensor: ");
+            Serial.print(controller->axisRY());
+            Serial.print(" Front Sensor: "); 
             Serial.println(front.getDistanceFloat());
 
-            mecharm.write(1500);
+            mecharm.write(1500); // need to keep mecharm stationary when not in use
 
             analogWrite(RLED, 100);
             analogWrite(GLED, 100);
             analogWrite(BLED, 100);
-            // delay(100);
-
-
-            // analogWrite(RLED, 0);
-            // analogWrite(GLED, 100);
-            // analogWrite(BLED, 0);
-            // delay(1000);
-
-
-            // analogWrite(RLED, 0);
-            // analogWrite(GLED, 0);
-            // analogWrite(BLED, 100);
-            // delay(100);
 
             // if(front.getDistanceFloat() > 10 && front.getDistanceFloat() < 20) {
             //     analogWrite(RLED, 200);
@@ -488,51 +474,36 @@ void loop() {
             // }
 
             if (controller->l1() == 1) {
-                // while(1) {
-                //     mecharm.write(1250);
-                //     if(controller->r2() == 0) {
-                //         break;
-                //     }
-                // }
                 mecharm.write(1250);
                 delay(100);
             }
 
             if (controller->r1() == 1) {
-                // while(1) {
-                //     mecharm.write(1750);
-                //     if(controller->r1() == 0) {
-                //         break;
-                //     }
-                // }
                 mecharm.write(1750);
                 delay(100);
             }
 
             // forward/backward control (RIGHT JOYSTICK Y-AXIS)
-            servo1.write(-1.0 * ((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
-            servo2.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
+            servo1.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
+            servo2.write(-1.0 * ((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
 
             // turning control (LEFT JOYSTICK X-AXIS)
                 // -x
             if (controller->axisX() > 0.0f) {
-                analogWrite(RLED, 0);
-                analogWrite(GLED, 200);
-                analogWrite(BLED, 0);
                 servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
             }
                 // +x
             if (controller->axisX() < 0.0f) {
-                analogWrite(RLED, 0);
-                analogWrite(GLED, 0);
-                analogWrite(BLED, 200);
                 servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
             }
 
             // LINE FOLLOW (PHYSICAL BUTTON A)
             if (controller->b()) { 
+                analogWrite(RLED, 0);
+                analogWrite(GLED, 0);
+                analogWrite(BLED, 100);
                 lineSetup();
                 while(1) {
                     BP32.update();
@@ -548,7 +519,10 @@ void loop() {
 
             // WALL FOLLOW (PHYSICAL BUTTON Y)
             if (controller->x()) {
-                    Serial.print("WALL FOLLOWING");
+                analogWrite(RLED, 100);
+                analogWrite(GLED, 0);
+                analogWrite(BLED, 0);
+                Serial.print("WALL FOLLOWING");
                 while(1) {
                     BP32.update();
                     // loop code here
@@ -559,10 +533,14 @@ void loop() {
                 }
             }
 
-            // COLOR DETECTION (PHYSICAL BUTTON X probably)
+            // COLOR DETECTION (PHYSICAL BUTTON X)
             if (controller->y()) {
+                    analogWrite(RLED, 100);
+                    analogWrite(GLED, 0);
+                    analogWrite(BLED, 100);
+                    delay(1000); // so color doesnt disappear too fast
                     Serial.print("COLOR SAMPLING");
-                while(1) {
+                while(1) { // we can just delete the while loop wrapper here no?
                     BP32.update();
                     color_challenge();
                    // if(controller->a() == 1) {
