@@ -24,7 +24,7 @@
 #define BLED 5
 #define LED 2
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
-ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27);
+ESP32SharpIR sensor1 ( ESP32SharpIR::GP2Y0A21YK0F, 27); // what is this for???
 ESP32SharpIR front(ESP32SharpIR::GP2Y0A21YK0F, 36);
 ESP32SharpIR right(ESP32SharpIR::GP2Y0A21YK0F, 39);
 ESP32SharpIR left(ESP32SharpIR::GP2Y0A21YK0F, 34);
@@ -329,18 +329,16 @@ void straight() {
 }
 
 void lineSetup() {  
-    qtr.setTypeRC(); // or setTypeAnalog() 
+    qtr.setTypeRC(); 
     qtr.setSensorPins ((const uint8_t []) {12, 14, 27, 26}, 4);
-    // int counter;
     // calibration sequence
     // TO DO: ADD SWEEPING MOTION SO NO JANKY CALIBRATION BY HAND
         for (uint8_t i = 0; i < 250; i++) {            
-            Serial.println("calibrating"); 
-            Serial.print(i);
-
+            Serial.print("calibrating"); 
+            Serial.println(i);
             qtr.calibrate();
             delay(20);
-            // NEED TO FIND WAY TO DEFINE CONTROLLER OBJECT GLOBALLY
+            // NEED TO FIND WAY TO DEFINE CONTROLLER OBJECT GLOBALLY TO CANCEL
             // if(controller->a() == 1) {
             //             break;
             // }
@@ -365,7 +363,7 @@ void lineLoop() {
     Serial.print("sensor4: ");
     Serial.println(sensors[3]);
 
-    delay(50); // might need to disable for comp
+    delay(20); // might need to disable for comp
 
     // 900+ means LINE 
     // 300 or less means NO LINE
@@ -407,14 +405,16 @@ void setup() {
     // servo2.setPeriodHertz(50);
     servo1.attach(15); 
     servo2.attach(2); 
-    mecharm.attach(0);
+    mecharm.attach(4);
 
     Serial.begin(115200);
-    sensor1.setFilterRate(0.1f);
+    sensor1.setFilterRate(0.1f); // what is this for??
 
-    pinMode(RLED, OUTPUT);
-    pinMode(GLED, OUTPUT);
-    pinMode(BLED, OUTPUT);
+    front.setFilterRate(0.1f);
+
+    pinMode(RLED,OUTPUT);
+    pinMode(GLED,OUTPUT);
+    pinMode(BLED,OUTPUT);
 
     //led setup
     //pinMode(LED,OUTPUT);
@@ -437,6 +437,7 @@ void loop() {
             launcher arm counterclockwise (R1)
             */
            
+           
            // controller output to serial monitor
             Serial.print(controller->a()); 
             Serial.print(controller->b()); 
@@ -444,17 +445,72 @@ void loop() {
             Serial.print(controller->y()); 
             Serial.print(controller->l1());
             Serial.print(controller->r1());
-            Serial.print("x-axis: ");
+            Serial.print(" x-axis: ");
             Serial.print(controller->axisX());
             Serial.print(" y-axis: ");
             Serial.println(controller->axisRY());
 
-            analogWrite(RLED, 200);
-            analogWrite(GLED, 0);
-            analogWrite(BLED, 200);
+            
+            Serial.print("Front Sensor: ");
+            Serial.println(front.getDistanceFloat());
+
+            mecharm.write(1500);
+
+            analogWrite(RLED, 100);
+            analogWrite(GLED, 100);
+            analogWrite(BLED, 100);
+            // delay(100);
+
+
+            // analogWrite(RLED, 0);
+            // analogWrite(GLED, 100);
+            // analogWrite(BLED, 0);
+            // delay(1000);
+
+
+            // analogWrite(RLED, 0);
+            // analogWrite(GLED, 0);
+            // analogWrite(BLED, 100);
+            // delay(100);
+
+            // if(front.getDistanceFloat() > 10 && front.getDistanceFloat() < 20) {
+            //     analogWrite(RLED, 200);
+            //     analogWrite(GLED, 0);
+            //     analogWrite(BLED, 200);
+            //     // delay(300);
+
+            //     if(front.getDistanceFloat() > 14 && front.getDistanceFloat() < 16) {
+            //         analogWrite(RLED, 200);
+            //         analogWrite(GLED, 200);
+            //         analogWrite(BLED, 200);
+            //         // delay(100);
+            //     }
+            // }
+
+            if (controller->l1() == 1) {
+                // while(1) {
+                //     mecharm.write(1250);
+                //     if(controller->r2() == 0) {
+                //         break;
+                //     }
+                // }
+                mecharm.write(1250);
+                delay(100);
+            }
+
+            if (controller->r1() == 1) {
+                // while(1) {
+                //     mecharm.write(1750);
+                //     if(controller->r1() == 0) {
+                //         break;
+                //     }
+                // }
+                mecharm.write(1750);
+                delay(100);
+            }
 
             // forward/backward control (RIGHT JOYSTICK Y-AXIS)
-            servo1.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
+            servo1.write(-1.0 * ((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
             servo2.write(((((float) controller->axisRY()) / 512.0f) * 500) + 1500);
 
             // turning control (LEFT JOYSTICK X-AXIS)
@@ -465,7 +521,6 @@ void loop() {
                 analogWrite(BLED, 0);
                 servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-                // Serial.println("1");
             }
                 // +x
             if (controller->axisX() < 0.0f) {
@@ -474,20 +529,6 @@ void loop() {
                 analogWrite(BLED, 200);
                 servo1.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
                 servo2.write(((((float) controller->axisX()) / 512.0f) * 500) + 1500);
-                // Serial.print("2");
-            }
-
-            if (controller->l1() == 1) {
-                Serial.print("l1good");
-                mecharm.write(1250);
-                servo1.write(1250);
-                servo2.write(1250);
-            }
-            if (controller->r1() == 1) {
-                Serial.print("r1good");
-                mecharm.write(2000);
-                servo1.write(2000);
-                servo2.write(2000);
             }
 
             // LINE FOLLOW (PHYSICAL BUTTON A)
@@ -505,7 +546,7 @@ void loop() {
                 }
             }
 
-            // WALL FOLLOW (PHYSICAL BUTTON Y probably)
+            // WALL FOLLOW (PHYSICAL BUTTON Y)
             if (controller->x()) {
                     Serial.print("WALL FOLLOWING");
                 while(1) {
