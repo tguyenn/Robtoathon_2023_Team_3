@@ -114,38 +114,40 @@ void Wall_Follow() {
     Serial.println(left.getDistanceFloat());
     Serial.print("Right Sensor: ");
     Serial.println(right.getDistanceFloat());
+    int dt  = 660;
 
 
-    if(front.getDistanceFloat() >= 15.00){
+
+    if(front.getDistanceFloat() >= 17.00){
         Serial.println("Continue Straight");
         servo1.writeMicroseconds(1000);
         servo2.writeMicroseconds(2000);
         delay(100);
     }
-    else {
-        Serial.println("Turn Right");
-        servo1.writeMicroseconds(1000);
-        servo2.writeMicroseconds(1000);
-        delay(660);
-    }
-    // else if((right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() >= 15.00)){
-    //     Serial.println("Turn Right 2");
-    //     servo1.writeMicroseconds(500);
-    //     servo2.writeMicroseconds(500);
-    //     delay_custom(750);
-    // }
-    // else if((front.getDistanceFloat() < 15.00)&&(right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() < 15.00)) {
+    // else {
     //     Serial.println("Turn Right");
     //     servo1.writeMicroseconds(1000);
     //     servo2.writeMicroseconds(1000);
-    //     delay_custom(550);
-    // }   
-    // else if((front.getDistanceFloat() < 15.00) && (left.getDistanceFloat() >= 15.00) && (right.getDistanceFloat() < 15.00)) {
-    //     Serial.println("Turn Left");
-    //     servo1.writeMicroseconds(2500);
-    //     servo2.writeMicroseconds(2500);
-    //     delay_custom(500);
+    //     delay(dt);
     // }
+    else if((right.getDistanceFloat() >= 17.00)&&(left.getDistanceFloat() >= 15.00)){
+        Serial.println("Turn Right 2");
+        servo1.writeMicroseconds(500);
+        servo2.writeMicroseconds(500);
+        delay(dt);
+    }
+    else if((front.getDistanceFloat() < 17.00)&&(right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() < 15.00)) {
+        Serial.println("Turn Right");
+        servo1.writeMicroseconds(1000);
+        servo2.writeMicroseconds(1000);
+        delay(dt);
+    }   
+    else if((front.getDistanceFloat() < 17.00) && (left.getDistanceFloat() >= 15.00) && (right.getDistanceFloat() < 15.00)) {
+        Serial.println("Turn Left");
+        servo1.writeMicroseconds(2500);
+        servo2.writeMicroseconds(2500);
+        delay(dt);
+    }
     // else{
     //     Serial.println("Stop");
     //     servo1.write(1500);
