@@ -173,7 +173,7 @@ char color_detector(int r, int g, int b, int a) {
     //currently doing nothing with clear
     return char_to_return;
 }
-void color_challenge() {
+void color_challenge(GamepadPtr controller) {
     color_setup();
     //This counter is just to keep track of time. 
     int counter = 0;
@@ -206,6 +206,11 @@ void color_challenge() {
         apds.readColor(r, g, b, a); //assigns color ints a value based on sensor
         last_color_detected = color_detector(r,g,b,a); //takes in color ints and returns whatever the strongest one is
 
+        //These lines here are so that if we need to abort color challenge and try again then we can. 
+        BP32.update();
+        if(controller->a() == 1) {
+            break;
+        }
         //This if statement will run a few times right at the beginning of our program
         //it's purpose is to identify what the sample color that we need to store is.
         //this statement should not be running at all after the first couple seconds
@@ -281,12 +286,10 @@ void color_challenge() {
             }
 
         }
-        counter+=1; 
+        counter+=1;
     }
-
-
-
 }
+
 // LINE FOLLOW FUNCTIONS
 void clockwise() {
     Serial.println("clockwise clockwise clockwise clockwise clockwise");
@@ -421,7 +424,9 @@ void setup() {
 
     //led setup
     //pinMode(LED,OUTPUT);
-    
+    analogWrite(RLED, 100);
+    analogWrite(GLED, 100);
+    analogWrite(BLED, 100);
 }
 
 void loop() {
@@ -457,23 +462,18 @@ void loop() {
 
             mecharm.write(1500); // need to keep mecharm stationary when not in use
 
-            analogWrite(RLED, 100);
-            analogWrite(GLED, 100);
-            analogWrite(BLED, 100);
 
-            // if(front.getDistanceFloat() > 10 && front.getDistanceFloat() < 20) {
-            //     analogWrite(RLED, 200);
-            //     analogWrite(GLED, 0);
-            //     analogWrite(BLED, 200);
-            //     // delay(300);
+            if(front.getDistanceFloat() > 10 && front.getDistanceFloat() < 20) {
+                analogWrite(RLED, 200);
+                analogWrite(GLED, 0);
+                analogWrite(BLED, 200);
+            }
 
-            //     if(front.getDistanceFloat() > 14 && front.getDistanceFloat() < 16) {
-            //         analogWrite(RLED, 200);
-            //         analogWrite(GLED, 200);
-            //         analogWrite(BLED, 200);
-            //         // delay(100);
-            //     }
-            // }
+            if(front.getDistanceFloat() > 14 && front.getDistanceFloat() < 16) {
+                analogWrite(RLED, 200);
+                analogWrite(GLED, 200);
+                analogWrite(BLED, 200);
+            }
 
             if (controller->l1() == 1) {
                 mecharm.write(1250);
@@ -514,6 +514,9 @@ void loop() {
                     lineLoop();
 
                     if(controller->a() == 1) {
+                        analogWrite(RLED, 100);
+                        analogWrite(GLED, 100);
+                        analogWrite(BLED, 100);
                         break;
                     }
                 }
@@ -530,27 +533,26 @@ void loop() {
                     // loop code here
                     Wall_Follow();
                     if(controller->a() == 1) {
+                        analogWrite(RLED, 100);
+                        analogWrite(GLED, 100);
+                        analogWrite(BLED, 100);
                         break;
                     }
                 }
+
             }
 
             // COLOR DETECTION (PHYSICAL BUTTON X)
             if (controller->y()) {
-                    analogWrite(RLED, 100);
-                    analogWrite(GLED, 0);
-                    analogWrite(BLED, 100);
-                    delay(1000); // so color doesnt disappear too fast
-                    Serial.print("COLOR SAMPLING");
-                while(1) { // we can just delete the while loop wrapper here no?
-                    BP32.update();
-                    color_challenge();
-                   // if(controller->a() == 1) {
-                    //    break;
-                    break;
-                    // setup and loop code here
-                   // }
-                }
+                analogWrite(RLED, 100);
+                analogWrite(GLED, 0);
+                analogWrite(BLED, 100);
+                delay(1000); // so color doesnt disappear too fast
+                Serial.print("COLOR SAMPLING");
+                color_challenge(controller);
+                analogWrite(RLED, 100);
+                analogWrite(GLED, 100);
+                analogWrite(BLED, 100);
             }
     }
         vTaskDelay(1);
