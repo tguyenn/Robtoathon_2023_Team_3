@@ -38,6 +38,18 @@ TwoWire I2C_0 = TwoWire(0);
 APDS9960 apds = APDS9960(I2C_0, APDS9960_INT);
 
 // BP32 FUNCTIONS
+
+//BASIC TAKE ABS VALUE FUNCTION
+
+int customAbsValue(int input_var) {
+    int return_val=input_var;
+    if (input_var < 0) {
+        return_val=-input_var;
+    }
+    return return_val;
+}
+
+
 void onConnectedGamepad(GamepadPtr gp) {
     bool foundEmptySlot = false;
     for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
@@ -161,6 +173,8 @@ char color_detector(int r, int g, int b, int a) {
     //It is NOT for long term storage of the sample color. 
     int value=r;
     char char_to_return = 'r';
+
+
     if (g>value) {
         value = g;
         char_to_return = 'g';
@@ -170,6 +184,16 @@ char color_detector(int r, int g, int b, int a) {
         char_to_return = 'b';
     }
 
+    //Ambience check
+   /* if (a>value) {
+        char_to_return='a';
+    }
+    */
+   
+    // Serial.println(g);
+    // Serial.println(r);
+    // Serial.println(b);
+    // Serial.println(a);
     //currently doing nothing with clear
     return char_to_return;
 }
@@ -186,6 +210,11 @@ void color_challenge(GamepadPtr controller) {
 
     //this guy holds whatever the sample color is
     char sample_color = 'z';
+    int sample_color_r =100;
+    int sample_color_g =100;
+    int sample_color_b =100;
+
+    int MAX_DEVIATION = 25;
 
     // these guys are helper variables for the color_detector function
     int r, g, b, a;
@@ -205,7 +234,6 @@ void color_challenge(GamepadPtr controller) {
         //these two lines help with the function that determines what color we are currently on.
         apds.readColor(r, g, b, a); //assigns color ints a value based on sensor
         last_color_detected = color_detector(r,g,b,a); //takes in color ints and returns whatever the strongest one is
-
         //These lines here are so that if we need to abort color challenge and try again then we can. 
         BP32.update();
         if(controller->a() == 1) {
@@ -217,6 +245,9 @@ void color_challenge(GamepadPtr controller) {
         if ((counter>50) && (counter<90))
         {
             sample_color = last_color_detected;
+            sample_color_r=r;
+            sample_color_g=g;
+            sample_color_b=b;
             Serial.println("The sample color is...");
             Serial.println(sample_color);
         }
@@ -262,12 +293,19 @@ void color_challenge(GamepadPtr controller) {
             servo2.writeMicroseconds(2000);
 
             Serial.println(last_color_detected);
+            /*if (last_color_detected=='a') {
+                Serial.println("I am on an ambient color right now.");
+            }*/
             if ((last_color_detected == sample_color) && (new_color_found == true)) {
-
-                Serial.println("I HAVE FOUND A COLOR MATCHING THE SAMPLE COLOR");
-                final_color_found = true; 
-                delay(100);
-                //END PROGRAM
+                Serial.println(customAbsValue(r-sample_color_r));
+                Serial.println(customAbsValue(g-sample_color_g));
+                Serial.println(customAbsValue(b-sample_color_b));
+                if ( (customAbsValue(r-sample_color_r)<MAX_DEVIATION) && (customAbsValue(g-sample_color_g)<MAX_DEVIATION) && (customAbsValue(b-sample_color_b)<MAX_DEVIATION)) {
+                    Serial.println("I HAVE FOUND A COLOR MATCHING THE SAMPLE COLOR");
+                    final_color_found = true; 
+                    delay(100);
+                    //END PROGRAM
+                }
 
             }
             //This should trigger as soon as we run into a new color 
@@ -293,14 +331,14 @@ void color_challenge(GamepadPtr controller) {
 // LINE FOLLOW FUNCTIONS
 void clockwise() {
     Serial.println("clockwise clockwise clockwise clockwise clockwise");
-    servo1.write(1250);
-    servo2.write(1500);
+    servo1.write(1500);
+    servo2.write(1750);
 }
 
 void counterclockwise() {
     Serial.println("counterclockwise counterclockwise counterclockwise counterclockwise counterclockwise");
-    servo1.write(1500);
-    servo2.write(1750);
+    servo1.write(1250);
+    servo2.write(1500);
 }
 
 void straight() {
@@ -329,8 +367,8 @@ void lineSetup() {
             }
             if(i - counter2 >= 30) {
                 counter2 = i;
-                servo1.write(1750);
-                servo2.write(1750);
+                servo1.write(2000);
+                servo2.write(2000); //offset bc servos are bad or smth lol
             }
 
             if(i == 245) {
@@ -462,17 +500,21 @@ void loop() {
 
             mecharm.write(1500); // need to keep mecharm stationary when not in use
 
-
+            // main loop led
             if(front.getDistanceFloat() > 10 && front.getDistanceFloat() < 20) {
-                analogWrite(RLED, 200);
-                analogWrite(GLED, 0);
-                analogWrite(BLED, 200);
+                analogWrite(RLED, 0);
+                analogWrite(GLED, 100);
+                analogWrite(BLED, 100);
             }
-
-            if(front.getDistanceFloat() > 14 && front.getDistanceFloat() < 16) {
-                analogWrite(RLED, 200);
+            else if(front.getDistanceFloat() > 14 && front.getDistanceFloat() < 16) {
+                analogWrite(RLED, 0);
                 analogWrite(GLED, 200);
-                analogWrite(BLED, 200);
+                analogWrite(BLED, 0);
+            }
+            else {
+                analogWrite(RLED, 100);
+                analogWrite(GLED, 100);
+                analogWrite(BLED, 100);
             }
 
             if (controller->l1() == 1) {
