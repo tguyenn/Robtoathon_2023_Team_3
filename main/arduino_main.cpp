@@ -108,15 +108,16 @@ void color_setup() {
     servo2.attach(2); 
 }
 
-// WALL FOLLOW FUNCTIONS
-
 void wall_setup()  {
-    front.setFilterRate(0.1f);
-    left.setFilterRate(0.1f);
-    right.setFilterRate(0.1f);
+    Serial.begin(115200);
+    front.setFilterRate(0.5f);
+    left.setFilterRate(0.5f);
+    right.setFilterRate(0.5f);
     servo1.attach(15);
     servo2.attach(2);
 }
+
+// WALL FOLLOW FUNCTIONS
 
 void Wall_Follow() {
     wall_setup();
@@ -126,45 +127,63 @@ void Wall_Follow() {
     Serial.println(left.getDistanceFloat());
     Serial.print("Right Sensor: ");
     Serial.println(right.getDistanceFloat());
-    int dt  = 660;
+    // int cooldown = 0;
 
-
-
-    if(front.getDistanceFloat() >= 17.00){
-        Serial.println("Continue Straight");
-        servo1.writeMicroseconds(1000);
-        servo2.writeMicroseconds(2000);
-        delay(100);
+    if((right.getDistanceFloat() <= 7.00)){
+        Serial.println("Corrective Turn Left ");
+        servo1.writeMicroseconds(2500);
+        servo2.writeMicroseconds(2500);
+        delay(50);
     }
-    // else {
-    //     Serial.println("Turn Right");
-    //     servo1.writeMicroseconds(1000);
-    //     servo2.writeMicroseconds(1000);
-    //     delay(dt);
-    // }
-    else if((right.getDistanceFloat() >= 17.00)&&(left.getDistanceFloat() >= 15.00)){
-        Serial.println("Turn Right 2");
+
+    if(left.getDistanceFloat() <= 7.00) {
+        Serial.println("Corrective Turn Right ");
         servo1.writeMicroseconds(500);
         servo2.writeMicroseconds(500);
-        delay(dt);
+        delay(50);
     }
-    else if((front.getDistanceFloat() < 17.00)&&(right.getDistanceFloat() >= 15.00)&&(left.getDistanceFloat() < 15.00)) {
+
+    else if(front.getDistanceFloat() >= 12.00){
+        Serial.println("Continue Straight");
+        servo1.writeMicroseconds(500);
+        servo2.writeMicroseconds(2500);
+        delay(50);
+    }
+    else if((front.getDistanceFloat() < 12.00) && (right.getDistanceFloat() >= 14.00) && (left.getDistanceFloat() < 14.00)) {
         Serial.println("Turn Right");
         servo1.writeMicroseconds(1000);
         servo2.writeMicroseconds(1000);
-        delay(dt);
+        delay(725);
     }   
-    else if((front.getDistanceFloat() < 17.00) && (left.getDistanceFloat() >= 15.00) && (right.getDistanceFloat() < 15.00)) {
+    else if((front.getDistanceFloat() < 12.00) && (left.getDistanceFloat() >= 14.00) && (right.getDistanceFloat() < 14.00)) {
         Serial.println("Turn Left");
-        servo1.writeMicroseconds(2500);
-        servo2.writeMicroseconds(2500);
-        delay(dt);
+        servo1.writeMicroseconds(2000);
+        servo2.writeMicroseconds(2000);
+        delay(800);
     }
-    // else{
-    //     Serial.println("Stop");
-    //     servo1.write(1500);
-    //     servo2.write(1500);
+
+    // else if((front.getDistanceFloat() >= 12.00)&&((right.getDistanceFloat() < 13.00)||(left.getDistanceFloat() < 12.00))){
+    //     Serial.println("Continue Straight");
+    //     servo1.writeMicroseconds(1000);
+    //     servo2.writeMicroseconds(2000);
+    //     delay(50);
     // }
+    // else if((front.getDistanceFloat() < 12.00)&&(right.getDistanceFloat() >= 12.00)&&(left.getDistanceFloat() < 12.00)) {
+    //     Serial.println("Turn Right");
+    //     servo1.writeMicroseconds(1000);
+    //     servo2.writeMicroseconds(1000);
+    //     delay(150);
+    // }
+
+    // else if((front.getDistanceFloat() < 12.00)&&(right.getDistanceFloat() < 12.00)&&(left.getDistanceFloat() >= 12.00)) {
+    //     Serial.println("Turn left");
+    //     servo1.writeMicroseconds(2000);
+    //     servo2.writeMicroseconds(2000);
+    //     delay(150);
+    // }
+
+
+
 } 
 
 char color_detector(int r, int g, int b, int a) {
@@ -303,7 +322,7 @@ void color_challenge(GamepadPtr controller) {
                 if ( (customAbsValue(r-sample_color_r)<MAX_DEVIATION) && (customAbsValue(g-sample_color_g)<MAX_DEVIATION) && (customAbsValue(b-sample_color_b)<MAX_DEVIATION)) {
                     Serial.println("I HAVE FOUND A COLOR MATCHING THE SAMPLE COLOR");
                     final_color_found = true; 
-                    delay(100);
+                    delay(50);
                     //END PROGRAM
                 }
 
