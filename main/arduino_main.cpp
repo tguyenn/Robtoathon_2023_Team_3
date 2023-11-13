@@ -143,23 +143,23 @@ void Wall_Follow() {
         delay(50);
     }
 
-    else if(front.getDistanceFloat() >= 12.00){
+    else if(front.getDistanceFloat() >= 10.00){
         Serial.println("Continue Straight");
         servo1.writeMicroseconds(500);
         servo2.writeMicroseconds(2500);
         delay(50);
     }
-    else if((front.getDistanceFloat() < 12.00) && (right.getDistanceFloat() >= 14.00) && (left.getDistanceFloat() < 14.00)) {
+    else if((front.getDistanceFloat() < 10.00) && (right.getDistanceFloat() >= 14.00) && (left.getDistanceFloat() < 14.00)) {
         Serial.println("Turn Right");
         servo1.writeMicroseconds(1000);
         servo2.writeMicroseconds(1000);
         delay(725);
     }   
-    else if((front.getDistanceFloat() < 12.00) && (left.getDistanceFloat() >= 14.00) && (right.getDistanceFloat() < 14.00)) {
+    else if((front.getDistanceFloat() < 10.00) && (left.getDistanceFloat() >= 14.00) && (right.getDistanceFloat() < 14.00)) {
         Serial.println("Turn Left");
         servo1.writeMicroseconds(2000);
         servo2.writeMicroseconds(2000);
-        delay(800);
+        delay(725);
     }
 
     // else if((front.getDistanceFloat() >= 12.00)&&((right.getDistanceFloat() < 13.00)||(left.getDistanceFloat() < 12.00))){
@@ -233,7 +233,7 @@ void color_challenge(GamepadPtr controller) {
     int sample_color_g =100;
     int sample_color_b =100;
 
-    int MAX_DEVIATION = 25;
+    int MAX_DEVIATION = 5;
 
     // these guys are helper variables for the color_detector function
     int r, g, b, a;
@@ -284,21 +284,27 @@ void color_challenge(GamepadPtr controller) {
 
                 if (sample_color == 'r') {
                     //do red flash
-                    digitalWrite(RLED,HIGH);
-                    delay(1000);
+                    analogWrite(RLED,100);
+                    analogWrite(GLED,0);
+                    analogWrite(BLED,0);
+                    delay(500);
                     Serial.println("SAMPLE COLOR FINAL IS RED");
 
                 }
                 else if (sample_color == 'g') {
                     //do green flash
-                    digitalWrite(GLED,HIGH);
-                    delay(1000);
+                    analogWrite(RLED,0);
+                    analogWrite(GLED,100);
+                    analogWrite(BLED,0);
+                    delay(500);
                     Serial.println("SAMPLE COLOR FINAL IS GREEN");
                 }
                 else if (sample_color == 'b') {
                     //do blue flash
-                    digitalWrite(BLED,HIGH);
-                    delay(1000);
+                    analogWrite(RLED,0);
+                    analogWrite(GLED,0);
+                    analogWrite(BLED,100);
+                    delay(500);
                     Serial.println("SAMPLE COLOR FINAL IS BLUE");
                 }
 
@@ -446,12 +452,8 @@ void lineLoop() {
     if(sensors[0] < 300 && sensors[1] < 300 && sensors[2] < 300 && sensors[3] < 300) {
         // SPIN IN PLACE
         // Serial.println("error");
-        timer++;
-        if(timer == 250) {
             servo1.write(1750);
             servo2.write(1750);
-            timer = 0;
-        }
 
     }
 }
